@@ -1,0 +1,33 @@
+name: Auto Comment on Feedback/Suggestion Issues
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  auto-comment:
+    if: |
+      contains(github.event.issue.labels.*.name, 'feedback') ||
+      contains(github.event.issue.labels.*.name, 'suggestion')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add thank you comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Thank you for your contribution!'
+            })
+      - name: Close issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            })
